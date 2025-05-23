@@ -89,7 +89,7 @@ MIT License - Free for educational and entertainment use
 
 ---
 
-**Made with ❤️ by @Rthur2003**  
+**Made with ❤️ by [@Rtur2003](https://github.com/Rtur2003)**  
 *"Hack responsibly!"*  
 
 ``` 
