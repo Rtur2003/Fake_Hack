@@ -791,35 +791,46 @@ class HackSimulator:
         # Pixel grid'i oluştur
         self.pixel_grid = {}
         
-        # Kırmızı ordu (sol taraf)
-        red_pixels = []
-        for x in range(0, self.grid_width // 4):
-            for y in range(self.grid_height):
-                if random.random() < 0.18:  # Daha dengeli yoğunluk
-                    pixel_id = self.create_pixel(x, y, random.choice(self.colors['red_army']))
-                    red_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'red'})
-        
-        # Mavi ordu (sağ taraf)
-        blue_pixels = []
-        for x in range(3 * self.grid_width // 4, self.grid_width):
-            for y in range(self.grid_height):
-                if random.random() < 0.18:  # Daha dengeli yoğunluk
-                    pixel_id = self.create_pixel(x, y, random.choice(self.colors['blue_army']))
-                    blue_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'blue'})
-        
-        # Yeşil ordu (merkez üst)
-        green_pixels = []
-        for x in range(self.grid_width // 3, 2 * self.grid_width // 3):
-            for y in range(0, self.grid_height // 4):
-                if random.random() < 0.12:  # Daha seyrek yoğunluk
-                    pixel_id = self.create_pixel(x, y, random.choice(self.colors['green_army']))
-                    green_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'green'})
-        
-        self.armies = {
-            'red': red_pixels,
-            'blue': blue_pixels,
-            'green': green_pixels
-        }
+        if self.config.glitch_mode:
+            # Glitch modu: ekranın tamamına rastgele gürültü
+            glitch_pixels = []
+            density = 0.22
+            for x in range(self.grid_width):
+                for y in range(self.grid_height):
+                    if random.random() < density:
+                        pixel_id = self.create_pixel(x, y, random.choice(self.colors['glitch']))
+                        glitch_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'glitch'})
+            self.armies = {'glitch': glitch_pixels}
+        else:
+            # Kırmızı ordu (sol taraf)
+            red_pixels = []
+            for x in range(0, self.grid_width // 4):
+                for y in range(self.grid_height):
+                    if random.random() < 0.18:  # Daha dengeli yoğunluk
+                        pixel_id = self.create_pixel(x, y, random.choice(self.colors['red_army']))
+                        red_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'red'})
+            
+            # Mavi ordu (sağ taraf)
+            blue_pixels = []
+            for x in range(3 * self.grid_width // 4, self.grid_width):
+                for y in range(self.grid_height):
+                    if random.random() < 0.18:  # Daha dengeli yoğunluk
+                        pixel_id = self.create_pixel(x, y, random.choice(self.colors['blue_army']))
+                        blue_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'blue'})
+            
+            # Yeşil ordu (merkez üst)
+            green_pixels = []
+            for x in range(self.grid_width // 3, 2 * self.grid_width // 3):
+                for y in range(0, self.grid_height // 4):
+                    if random.random() < 0.12:  # Daha seyrek yoğunluk
+                        pixel_id = self.create_pixel(x, y, random.choice(self.colors['green_army']))
+                        green_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'green'})
+            
+            self.armies = {
+                'red': red_pixels,
+                'blue': blue_pixels,
+                'green': green_pixels
+            }
         
         # Savaşı başlat
         self.battle_round = 0
