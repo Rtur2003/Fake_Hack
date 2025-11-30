@@ -737,7 +737,7 @@ class HackSimulator:
         self.show_war_message()
         
         # Pixel savaşını başlat
-        self.root.after(2000, self.initialize_armies)
+        self.root.after(1200, self.initialize_armies)
     
     def show_war_message(self):
         """Savaş başlangıç mesajını göster"""
