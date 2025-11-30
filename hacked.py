@@ -94,12 +94,9 @@ class RealSystemInfo:
     def get_local_ip():
         """Yerel IP adresini al"""
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
-            ip = s.getsockname()[0]
-            s.close()
-            return ip
-        except:
+            with socket.create_connection(("8.8.8.8", 80), timeout=0.5) as s:
+                return s.getsockname()[0]
+        except Exception:
             return "127.0.0.1"
     
     @staticmethod
