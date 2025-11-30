@@ -20,8 +20,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 # Sabit değişkenler
-DEFAULT_DURATION = 55  # Ana simulasyon suresi (saniye)
-DEFAULT_AUTO_CLOSE = 25  # Pixel savasi sonrasi ekstra bekleme (saniye)
+DEFAULT_DURATION = 90  # Ana simulasyon suresi (saniye)
+DEFAULT_AUTO_CLOSE = 35  # Pixel savasi sonrasi ekstra bekleme (saniye)
 BACKGROUND_COLOR = "#0c0c0c"
 TEXT_COLOR = "#00ff41"
 HIGHLIGHT_COLOR = "#ff4444"
@@ -150,6 +150,9 @@ class HackSimulator:
         self.after_jobs = []
         self.auto_close_timer = None
         self.sim_duration = self.config.duration
+        self.sim_progress = 0.0
+        self.current_phase_index = 0
+        self.sequence_started_at = None
         self.root.title("System Access Terminal")
         self.root.configure(bg=BACKGROUND_COLOR)
         if self.config.fullscreen:
