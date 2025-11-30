@@ -378,6 +378,24 @@ class HackSimulator:
             font=("Consolas", 12)
         )
         subtitle_label.pack(side='left')
+        self.operation_label = tk.Label(
+            controls_frame,
+            text=f"OP {self.operation_code} | {self.phase_count} phases",
+            fg=TEXT_COLOR,
+            bg=BACKGROUND_COLOR,
+            font=("Consolas", 10, "bold")
+        )
+        self.operation_label.pack(side='left', padx=(15, 0))
+        self.phase_badge = tk.Label(
+            controls_frame,
+            text=f"PHASE 1/{self.phase_count} | {self.current_phase_name.upper()}",
+            fg=BACKGROUND_COLOR,
+            bg=TEXT_COLOR,
+            font=("Consolas", 9, "bold"),
+            padx=8,
+            pady=2
+        )
+        self.phase_badge.pack(side='right', padx=(0, 10))
         exit_button = tk.Button(
             controls_frame,
             text="EXIT",
