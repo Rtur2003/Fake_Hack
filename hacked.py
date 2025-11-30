@@ -609,7 +609,7 @@ class HackSimulator:
         
         while log_index < len(self.logs):
             elapsed = time.time() - start_time
-            progress = min(elapsed / TOTAL_TIME, 1)
+            progress = min(elapsed / self.sim_duration, 1)
             
             # İlerleme güncelle
             self.progress_bar['value'] = progress * 100
@@ -626,7 +626,7 @@ class HackSimulator:
                 self.progress_label.config(text="Finalizing system compromise...")
             
             # Yeni log ekleme zamanı
-            if log_index < len(self.logs) and elapsed > log_index * (TOTAL_TIME / len(self.logs)):
+            if log_index < len(self.logs) and elapsed > log_index * (self.sim_duration / len(self.logs)):
                 log = self.logs[log_index]
                 
                 # Terminal'e yaz
