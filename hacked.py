@@ -20,7 +20,6 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 # Sabit değişkenler
-TOTAL_TIME = 30  # Toplam simülasyon süresi (saniye)
 DEFAULT_DURATION = 35  # Ana simulasyon suresi (saniye)
 DEFAULT_AUTO_CLOSE = 15  # Pixel savasi sonrasi ekstra bekleme (saniye)
 BACKGROUND_COLOR = "#0c0c0c"
