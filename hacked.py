@@ -487,6 +487,23 @@ class HackSimulator:
         self.time_label.pack(side='right', padx=10, fill='y')
         
         self.update_clock()
+
+    def schedule(self, delay_ms, callback):
+        """after çağrılarını takip ederek güvenli planlama"""
+        if self.shutdown_flag:
+            return None
+        job = self.root.after(delay_ms, callback)
+        self.after_jobs.append(job)
+        return job
+
+    def cancel_scheduled_tasks(self):
+        """Çalışan after görevlerini temizle"""
+        for job in list(self.after_jobs):
+            try:
+                self.root.after_cancel(job)
+            except Exception:
+                pass
+        self.after_jobs.clear()
     
     def update_info_panel(self):
         """Sistem bilgilerini güncelle"""
@@ -499,8 +516,13 @@ class HackSimulator:
     def update_live_data(self):
         """Canlı verileri güncelle"""
         try:
+            if self.shutdown_flag or not self.ui_active:
+                return
+            if not self.live_text.winfo_exists():
+                return
+
             # Güncel sistem verilerini al
-            current_cpu = psutil.cpu_percent(interval=0.1)
+            current_cpu = psutil.cpu_percent(interval=0.0)
             current_memory = psutil.virtual_memory().percent
             
             # Network bağlantıları
@@ -533,14 +555,18 @@ class HackSimulator:
         except Exception as e:
             print(f"Canlı veri güncellemesi hatası: {e}")
         
-        # 2 saniyede bir güncelle
-        self.root.after(2000, self.update_live_data)
+        # 1.5 saniyede bir güncelle
+        self.schedule(1500, self.update_live_data)
     
     def update_clock(self):
         """Saati güncelle"""
+        if self.shutdown_flag or not self.ui_active:
+            return
+        if not self.time_label.winfo_exists():
+            return
         current_time = time.strftime("%H:%M:%S")
         self.time_label.config(text=current_time)
-        self.root.after(1000, self.update_clock)
+        self.schedule(1000, self.update_clock)
     
     def block_input(self, event):
         """Kullanıcı girdilerini engelle"""
@@ -548,8 +574,16 @@ class HackSimulator:
     
     def emergency_exit(self, event=None):
         """Acil çıkış"""
+        if self.shutdown_flag:
+            return
+        self.shutdown_flag = True
+        self.ui_active = False
+        self.cancel_scheduled_tasks()
         if hasattr(self, 'auto_close_timer') and self.auto_close_timer:
-            self.root.after_cancel(self.auto_close_timer)
+            try:
+                self.root.after_cancel(self.auto_close_timer)
+            except Exception:
+                pass
         try:
             pygame.mixer.quit()
             pygame.quit()
