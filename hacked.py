@@ -979,6 +979,28 @@ class HackSimulator:
             if (x, y) not in self.pixel_grid:
                 color = random.choice(self.colors['chaos'])
                 self.create_pixel(x, y, color)
+
+    def run_glitch_frame(self):
+        """Glitch/karıncalanma efekti uygula"""
+        if self.shutdown_flag or not self.war_active:
+            return
+        # Rastgele satırları invert/flicker et
+        for _ in range(8):
+            x1 = 0
+            x2 = self.screen_width
+            y = random.randint(0, self.screen_height)
+            thickness = random.randint(1, 6)
+            color = random.choice(self.colors['glitch'])
+            self.canvas.create_rectangle(x1, y, x2, y + thickness, fill=color, outline='', tags='scan')
+        # Rastgele blok gürültü
+        for _ in range(150):
+            gx = random.randint(0, self.grid_width - 1)
+            gy = random.randint(0, self.grid_height - 1)
+            color = random.choice(self.colors['glitch'])
+            self.create_pixel(gx, gy, color)
+        # Gürültüyü sınırlı tutmak için eski pixelleri temizle
+        if len(self.canvas.find_withtag('pixel')) > 12000:
+            self.canvas.delete(random.choice(self.canvas.find_withtag('pixel')))
     
     def end_war(self):
         """Savaşı bitir"""
