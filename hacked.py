@@ -872,16 +872,19 @@ class HackSimulator:
             self.end_war()
             return
             
-        # Her ordu için hareket et
-        for army_name, army_pixels in self.armies.items():
-            self.move_army(army_name, army_pixels)
-        
-        # Çatışmaları kontrol et
-        self.handle_conflicts()
-        
-        # Rastgele kaos pixelleri ekle
-        if random.random() < 0.08:
-            self.spawn_chaos_pixels()
+        if self.config.glitch_mode:
+            self.run_glitch_frame()
+        else:
+            # Her ordu için hareket et
+            for army_name, army_pixels in self.armies.items():
+                self.move_army(army_name, army_pixels)
+            
+            # Çatışmaları kontrol et
+            self.handle_conflicts()
+            
+            # Rastgele kaos pixelleri ekle
+            if random.random() < 0.08:
+                self.spawn_chaos_pixels()
         
         # Sonraki tur
         self.battle_round += 1
