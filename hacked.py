@@ -677,6 +677,11 @@ class HackSimulator:
     
     def start_pixel_war(self):
         """Pixel savaşı efektini başlat"""
+        if self.shutdown_flag:
+            return
+        self.ui_active = False
+        self.cancel_scheduled_tasks()
+
         # Mevcut arayüzü gizle
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -696,9 +701,11 @@ class HackSimulator:
         self.screen_height = self.root.winfo_screenheight()
         
         # Pixel savaşı değişkenleri
-        self.pixel_size = 4
+        self.pixel_size = max(3, self.config.pixel_size)
         self.pixels = []
         self.war_active = True
+        self.war_tick_ms = max(30, self.config.war_tick_ms)
+        self.battle_round_limit = 240
         
         # İki farklı renk ordusu
         self.colors = {
@@ -770,7 +777,7 @@ class HackSimulator:
         red_pixels = []
         for x in range(0, self.grid_width // 4):
             for y in range(self.grid_height):
-                if random.random() < 0.3:  # %30 yoğunluk
+                if random.random() < 0.18:  # Daha dengeli yoğunluk
                     pixel_id = self.create_pixel(x, y, random.choice(self.colors['red_army']))
                     red_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'red'})
         
@@ -778,7 +785,7 @@ class HackSimulator:
         blue_pixels = []
         for x in range(3 * self.grid_width // 4, self.grid_width):
             for y in range(self.grid_height):
-                if random.random() < 0.3:  # %30 yoğunluk
+                if random.random() < 0.18:  # Daha dengeli yoğunluk
                     pixel_id = self.create_pixel(x, y, random.choice(self.colors['blue_army']))
                     blue_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'blue'})
         
@@ -786,7 +793,7 @@ class HackSimulator:
         green_pixels = []
         for x in range(self.grid_width // 3, 2 * self.grid_width // 3):
             for y in range(0, self.grid_height // 4):
-                if random.random() < 0.2:  # %20 yoğunluk
+                if random.random() < 0.12:  # Daha seyrek yoğunluk
                     pixel_id = self.create_pixel(x, y, random.choice(self.colors['green_army']))
                     green_pixels.append({'id': pixel_id, 'x': x, 'y': y, 'army': 'green'})
         
@@ -830,7 +837,9 @@ class HackSimulator:
     
     def start_battle(self):
         """Savaş turunu başlat"""
-        if not self.war_active or self.battle_round > 200:
+        if self.shutdown_flag:
+            return
+        if not self.war_active or self.battle_round > self.battle_round_limit:
             self.end_war()
             return
             
@@ -842,12 +851,12 @@ class HackSimulator:
         self.handle_conflicts()
         
         # Rastgele kaos pixelleri ekle
-        if random.random() < 0.1:
+        if random.random() < 0.08:
             self.spawn_chaos_pixels()
         
         # Sonraki tur
         self.battle_round += 1
-        self.root.after(50, self.start_battle)  # 50ms aralıklarla
+        self.root.after(self.war_tick_ms, self.start_battle)
     
     def move_army(self, army_name, army_pixels):
         """Orduyu hareket ettir"""
@@ -929,7 +938,9 @@ class HackSimulator:
     
     def spawn_chaos_pixels(self):
         """Rastgele kaos pixelleri oluştur"""
-        for _ in range(random.randint(10, 30)):
+        if self.shutdown_flag or not self.war_active:
+            return
+        for _ in range(random.randint(6, 18)):
             x = random.randint(0, self.grid_width - 1)
             y = random.randint(0, self.grid_height - 1)
             
