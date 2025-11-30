@@ -39,6 +39,7 @@ Key options:
 Controls:
 - `ESC` / `Ctrl+Q` / EXIT button: close immediately
 - `F11`: toggle fullscreen
+- Static/glitch finale is on by default for a “broken screen” vibe; disable with `--no-glitch`.
 
 ---
 
