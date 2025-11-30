@@ -143,6 +143,12 @@ class RealSystemInfo:
 class HackSimulator:
     def __init__(self, root, config: SimulatorConfig):
         self.root = root
+        self.config = config
+        self.ui_active = True
+        self.shutdown_flag = False
+        self.after_jobs = []
+        self.auto_close_timer = None
+        self.sim_duration = self.config.duration
         self.root.title("System Access Terminal")
         self.root.configure(bg=BACKGROUND_COLOR)
         self.root.attributes('-fullscreen', True)
