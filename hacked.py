@@ -141,7 +141,7 @@ class RealSystemInfo:
             return []
 
 class HackSimulator:
-    def __init__(self, root):
+    def __init__(self, root, config: SimulatorConfig):
         self.root = root
         self.root.title("System Access Terminal")
         self.root.configure(bg=BACKGROUND_COLOR)
