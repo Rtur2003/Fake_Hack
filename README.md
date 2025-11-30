@@ -8,6 +8,7 @@ Visual hacking simulator with real system stats, cinematic terminal logs, and a 
 - Phase-driven script: Recon -> Breach -> Pivot -> Exfil -> Cleanup with live system fingerprinting and OP code
 - Real telemetry: CPU/RAM/disk, OS/user/host info, top processes, live connections, data siphon meter
 - Immersive terminal: timestamped logs, phase badge, threat indicator, progress bar
+- Desktop decoy into glitch: brief “restored” desktop screenshot before the takeover
 - Pixel war and glitch-to-overlay finale: full-screen battle plus typewritten watcher messages that break the 4th wall
 - Safety controls: ESC or on-screen EXIT button; optional input block
 

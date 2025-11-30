@@ -17,7 +17,7 @@ import pygame
 import psutil
 import tkinter as tk
 from tkinter import ttk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageGrab
 
 # Sabit değişkenler
 DEFAULT_DURATION = 90  # Ana simulasyon suresi (saniye)
@@ -832,6 +832,45 @@ class HackSimulator:
             self.terminal_text.config(state='normal')
             self.terminal_text.delete("1.0", "3.0")
             self.terminal_text.config(state='disabled')
+
+    def typewriter_terminal(self, text, color=HIGHLIGHT_COLOR, speed=24):
+        """Terminale yavaş akan satır ekle"""
+        if self.shutdown_flag or not getattr(self, "terminal_text", None):
+            return
+        if not self.terminal_text.winfo_exists():
+            return
+        timestamp = time.strftime("[%H:%M:%S] ")
+        self.terminal_text.config(state='normal')
+        self.terminal_text.insert(tk.END, timestamp, "timestamp")
+        self.terminal_text.tag_configure("observer", foreground=color)
+        self.terminal_text.tag_configure("timestamp", foreground=SECONDARY_TEXT)
+        self.terminal_text.config(state='disabled')
+
+        def step(i=0):
+            if self.shutdown_flag or not self.terminal_text.winfo_exists():
+                return
+            self.terminal_text.config(state='normal')
+            self.terminal_text.insert(tk.END, text[i], "observer")
+            self.terminal_text.config(state='disabled')
+            self.terminal_text.see(tk.END)
+            if i + 1 < len(text):
+                self.schedule(speed, lambda: step(i + 1))
+            else:
+                self.terminal_text.config(state='normal')
+                self.terminal_text.insert(tk.END, "\n")
+                self.terminal_text.config(state='disabled')
+
+        step()
+
+    def schedule_whispers(self):
+        """Gözlemci mesajlarını zamanlayarak terminale bırak"""
+        if not getattr(self, "observer_messages", None):
+            return
+        base = 8000
+        gap = 9500
+        for idx, msg in enumerate(self.observer_messages):
+            delay = base + idx * gap
+            self.schedule(delay, lambda m=msg: self.typewriter_terminal(m, HIGHLIGHT_COLOR, speed=26))
     
     def start_pixel_war(self):
         """Pixel savaşı efektini başlat"""
@@ -843,6 +882,15 @@ class HackSimulator:
         # Mevcut arayüzü gizle
         for widget in self.root.winfo_children():
             widget.destroy()
+        
+        # Masastü decoy için ekran görüntüsü
+        self.desktop_photo = None
+        try:
+            grab = ImageGrab.grab()
+            grab = grab.resize((self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
+            self.desktop_photo = ImageTk.PhotoImage(grab)
+        except Exception:
+            self.desktop_photo = None
         
         # Yeni canvas oluştur (tam ekran)
         self.canvas = tk.Canvas(
@@ -864,6 +912,8 @@ class HackSimulator:
         self.war_active = True
         self.war_tick_ms = max(30, self.config.war_tick_ms)
         self.battle_round_limit = 360 if self.config.glitch_mode else 240
+        self.grid_width = max(1, self.screen_width // self.pixel_size)
+        self.grid_height = max(1, self.screen_height // self.pixel_size)
         
         # İki farklı renk ordusu
         self.colors = {
@@ -874,13 +924,60 @@ class HackSimulator:
             'glitch': ['#00ff41', '#33ffaa', '#ff0080', '#ffffff', '#00ccff', '#ffcc00']
         }
         
-        # Başlangıç mesajı
-        self.show_war_message()
-        
-        # Pixel savaşını başlat
-        self.root.after(1200, self.initialize_armies)
-        # Gözetmen yazı şeridi
-        self.start_overlay_script()
+        # Decoy sahne veya doğrudan glitch
+        if self.desktop_photo:
+            self.show_desktop_decoy()
+        else:
+            self.show_war_message()
+            self.root.after(1200, self.initialize_armies)
+            self.root.after(1200, self.start_overlay_script)
+
+    def show_desktop_decoy(self):
+        """Ekran düzelmiş gibi masaüstü görüntüsü göster, sonra bozulma başlat"""
+        if self.shutdown_flag or not getattr(self, "desktop_photo", None):
+            self.show_war_message()
+            self.root.after(1200, self.initialize_armies)
+            self.start_overlay_script()
+            return
+        self.canvas.delete("all")
+        self.canvas.create_image(0, 0, image=self.desktop_photo, anchor='nw', tags='desktop')
+        self.canvas.create_rectangle(
+            0, 0, self.screen_width, 28,
+            fill="#000000", outline="", tags="desktop"
+        )
+        self.canvas.create_text(
+            10, 14,
+            text="Secure Desktop - restoring...",
+            fill="#00ff41",
+            font=("Consolas", 11, "bold"),
+            anchor="w",
+            tags="desktop"
+        )
+        self.schedule(900, self.glitch_decoy)
+        self.schedule(1700, self.show_war_message)
+        self.schedule(2400, self.initialize_armies)
+        self.schedule(2400, self.start_overlay_script)
+
+    def glitch_decoy(self):
+        """Masaüstü üstüne kısa glitch taraması"""
+        if self.shutdown_flag or not getattr(self, "canvas", None):
+            return
+        sweeps = 60
+        for _ in range(sweeps):
+            x1 = 0
+            x2 = self.screen_width
+            y = random.randint(0, self.screen_height)
+            thickness = random.randint(3, 14)
+            color = random.choice(self.colors['glitch'])
+            self.canvas.create_rectangle(x1, y, x2, y + thickness, fill=color, outline='', tags='decoy_glitch')
+        blocks = 220
+        for _ in range(blocks):
+            gx = random.randint(0, self.grid_width - 1)
+            gy = random.randint(0, self.grid_height - 1)
+            color = random.choice(self.colors['glitch'])
+            x1 = gx * self.pixel_size
+            y1 = gy * self.pixel_size
+            self.canvas.create_rectangle(x1, y1, x1 + self.pixel_size, y1 + self.pixel_size, fill=color, outline='', tags='decoy_glitch')
     
     def show_war_message(self):
         """Savaş başlangıç mesajını göster"""
