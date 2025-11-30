@@ -1,109 +1,53 @@
-# 🔥 **System Hack Simulator** 🔥  
+# System Hack Simulator
 
-**💻 A Realistic Hacking Simulation with Pixel War Visual Effects**  
-
-This project is a **fun, fictional** system hacking simulator that mimics a cyber attack in a cinematic way. It displays realistic system data, simulates a hacking process, and ends with a stunning **pixel war animation**.  
-
-*(Disclaimer: This is just a visual simulation - no actual hacking occurs!)*  
+Visual hacking simulator with real system stats, cinematic terminal logs, and a pixel-war finale. **No real hacking is performed.**
 
 ---
 
-## 🚀 **Features**  
-
-✔ **Real System Data Integration**  
-- Gathers actual CPU, RAM, disk, and network stats  
-- Displays genuine OS, hostname, and user info  
-
-✔ **Immersive Terminal Interface**  
-- Hollywood-style hacking logs with timestamps  
-- Progress bar and status updates  
-
-✔ **Live System Monitoring**  
-- Real-time process tracking  
-- Active network connections  
-
-✔ **Epic Pixel War Finale**  
-- Trippy color battle animation  
-- Simulated "system corruption" effect  
-
-✔ **Fullscreen Immersion Mode**  
-- Blocks user input (ESC to exit)  
-- Auto-shutdown after completion  
+## Features
+- Real system data: CPU/RAM/disk, OS/user/host info, top processes, live connections
+- Immersive terminal: timestamped logs, status chips, progress bar
+- Pixel war finale: full-screen animated color battle (optional)
+- Safety controls: ESC or on-screen EXIT button; optional input block
 
 ---
 
-## ⚙️ **Installation**  
-
-1. **Clone the repo:**  
-   ```bash
-   git clone https://github.com/yourusername/system-hack-simulator.git
-   cd system-hack-simulator
-   ```
-
-2. **Install dependencies:**  
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-   *(Requirements: Python 3.6+, `psutil`, `pygame`, `Pillow`)*  
-
-3. **Run the simulator:**  
-   ```bash
-   python hack_simulator.py
-   ```
+## Installation
+1) Python 3.8+  
+2) Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## 🎮 **Usage**  
+## Usage
+```bash
+python hacked.py [options]
+```
 
-- The simulation runs automatically for **45 seconds**  
-- Watch the terminal logs and progress bar  
-- Enjoy the pixel war finale  
-- Press **ESC anytime** to emergency exit  
+Key options:
+- `--duration SECONDS`     main simulation length (default 35s)
+- `--auto-close SECONDS`   extra wait after pixel war (default 15s)
+- `--no-fullscreen`        windowed mode
+- `--no-pixel-war`         skip the pixel battle
+- `--block-input`          block keyboard/mouse except ESC
+- `--pixel-size N`         pixel size for the war (default 5)
+- `--war-tick MS`          tick interval for war updates (default 60ms)
 
----
-
-## 🌟 **Why This Project?**  
-
-- Perfect for **cybersecurity demos**  
-- Great visual for **tech-themed events**  
-- Fun way to learn about **system monitoring**  
-- 100% safe (no real system changes)  
-
----
-
-## 🛠 **Technical Details**  
-
-- **Data Collection:** Uses `psutil` for real-time stats  
-- **Visuals:** Tkinter GUI with retro terminal styling  
-- **Animation:** Canvas-based pixel grid system  
-- **Safety:** Blocks all input except ESC key  
+Controls:
+- `ESC` / `Ctrl+Q` / EXIT button: close immediately
+- `F11`: toggle fullscreen
 
 ---
 
-## 📜 **License**  
-
-MIT License - Free for educational and entertainment use  
-
-**⚠ Warning:** Do not use for malicious purposes!  
+## Notes
+- Collects and displays local machine statistics only.
+- Uses: `tkinter` (UI), `psutil` (metrics), `pygame` (sound, optional), `Pillow` (image helpers).
+- Designed for demos and fun visual effect; keep it ethical.
 
 ---
 
-**Made with ❤️ by [@Rtur2003](https://github.com/Rtur2003)**  
-*"Hack responsibly!"*  
-
-``` 
-
-### Key Highlights:
-- **Professional yet fun** tone with emojis
-- Clear **disclaimers** about being a simulation
-- **Technical depth** in the features list
-- **Visual hierarchy** with sections
-- **Callouts** for important notes
-- **Installation** simplicity
-- **Ethical reminder** in license
-
-Would you like me to adjust any section? For example:
-1. Add more technical specs?
-2. Include a screenshot guide?
-3. Expand the "Why This Project?" section?
+## License
+MIT License. Use responsibly.  
+Original idea by [@Rtur2003](https://github.com/Rtur2003).

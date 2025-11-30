@@ -20,8 +20,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 # Sabit değişkenler
-DEFAULT_DURATION = 35  # Ana simulasyon suresi (saniye)
-DEFAULT_AUTO_CLOSE = 15  # Pixel savasi sonrasi ekstra bekleme (saniye)
+DEFAULT_DURATION = 55  # Ana simulasyon suresi (saniye)
+DEFAULT_AUTO_CLOSE = 25  # Pixel savasi sonrasi ekstra bekleme (saniye)
 BACKGROUND_COLOR = "#0c0c0c"
 TEXT_COLOR = "#00ff41"
 HIGHLIGHT_COLOR = "#ff4444"
@@ -37,7 +37,8 @@ class SimulatorConfig:
     enable_pixel_war: bool = True
     block_input: bool = False
     pixel_size: int = 5
-    war_tick_ms: int = 60
+    war_tick_ms: int = 45
+    glitch_mode: bool = True  # Ekran karincalanma efekti acik
 
 
 class RealSystemInfo:
@@ -66,7 +67,8 @@ class RealSystemInfo:
             # CPU bilgileri
             info['cpu_count'] = psutil.cpu_count()
             info['cpu_freq'] = f"{psutil.cpu_freq().current:.0f} MHz" if psutil.cpu_freq() else "N/A"
-            info['cpu_usage'] = f"{psutil.cpu_percent(interval=1)}%"
+            # interval=0.0 for a quick, non-blocking sample
+            info['cpu_usage'] = f"{psutil.cpu_percent(interval=0.0)}%"
             
             # Disk bilgileri
             disk = psutil.disk_usage('/')
@@ -181,17 +183,6 @@ class HackSimulator:
         except Exception as e:
             print(f"Ses sistemi başlatılamadı: {e}")
         
-        # Giriş engellemeyi aktifleştir
-        self.root.bind_all("<Key>", self.block_input)
-        self.root.bind_all("<Button>", self.block_input)
-        
-        # Çıkış tuşu (gizli)
-        self.root.bind("<Escape>", self.emergency_exit)
-        
-        # Otomatik kapanma zamanlayıcısı
-        self.auto_close_time = 45
-        self.auto_close_timer = None
-        
         # Simülasyonu başlat
         self.start_simulation()
     
@@ -304,16 +295,32 @@ class HackSimulator:
             font=("Consolas", 24, "bold")
         )
         title_label.pack(pady=(0, 5))
-        
+
+        controls_frame = tk.Frame(header_frame, bg=BACKGROUND_COLOR)
+        controls_frame.pack(fill='x')
         # Alt başlık
         subtitle_label = tk.Label(
-            header_frame,
+            controls_frame,
             text=f"Compromising {self.system_data.get('os', 'Unknown System')} | User: {self.system_data.get('username', 'Unknown')}",
             fg=SECONDARY_TEXT,
             bg=BACKGROUND_COLOR,
             font=("Consolas", 12)
         )
-        subtitle_label.pack()
+        subtitle_label.pack(side='left')
+        exit_button = tk.Button(
+            controls_frame,
+            text="EXIT",
+            command=self.emergency_exit,
+            bg=HIGHLIGHT_COLOR,
+            fg="white",
+            activebackground="#ff6666",
+            activeforeground="white",
+            bd=0,
+            padx=10,
+            pady=2,
+            font=("Consolas", 10, "bold")
+        )
+        exit_button.pack(side='right')
         
         # Ayırıcı çizgi
         separator = tk.Frame(header_frame, bg=TEXT_COLOR, height=1)
@@ -571,6 +578,13 @@ class HackSimulator:
         """Kullanıcı girdilerini engelle"""
         return "break"
     
+    def toggle_fullscreen(self, event=None):
+        """F11 ile tam ekran aç/kapa"""
+        self.config.fullscreen = not self.config.fullscreen
+        self.root.attributes("-fullscreen", self.config.fullscreen)
+        self.root.config(cursor="none" if self.config.fullscreen else "arrow")
+        return "break"
+    
     def emergency_exit(self, event=None):
         """Acil çıkış"""
         if self.shutdown_flag:
@@ -649,7 +663,10 @@ class HackSimulator:
         
         # 3 saniye bekle sonra pixel savaşını başlat
         time.sleep(3)
-        self.start_pixel_war()
+        if self.config.enable_pixel_war:
+            self.start_pixel_war()
+        else:
+            self.schedule(1500, self.emergency_exit)
     
     def add_terminal_line(self, text, color=TEXT_COLOR):
         """Terminal'e satır ekle"""
@@ -989,8 +1006,28 @@ def main():
             print("Yüklemek için: pip install psutil pygame Pillow")
             return
         
+        parser = argparse.ArgumentParser(description="System Hack Simulator (visual only)")
+        parser.add_argument("--duration", type=int, default=DEFAULT_DURATION, help="Main simulation duration seconds")
+        parser.add_argument("--auto-close", type=int, default=DEFAULT_AUTO_CLOSE, dest="auto_close", help="Extra wait before closing after pixel war")
+        parser.add_argument("--no-fullscreen", action="store_true", help="Run windowed instead of fullscreen")
+        parser.add_argument("--no-pixel-war", action="store_true", help="Skip pixel war finale")
+        parser.add_argument("--block-input", action="store_true", help="Block all keyboard/mouse input except ESC")
+        parser.add_argument("--pixel-size", type=int, default=5, help="Pixel size for war effect")
+        parser.add_argument("--war-tick", type=int, default=60, help="Tick interval (ms) for pixel war updates")
+        args = parser.parse_args()
+
+        config = SimulatorConfig(
+            duration=max(5, args.duration),
+            auto_close=max(0, args.auto_close),
+            fullscreen=not args.no_fullscreen,
+            enable_pixel_war=not args.no_pixel_war,
+            block_input=args.block_input,
+            pixel_size=max(2, args.pixel_size),
+            war_tick_ms=max(20, args.war_tick),
+        )
+
         root = tk.Tk()
-        app = HackSimulator(root)
+        app = HackSimulator(root, config)
         root.mainloop()
     except Exception as e:
         print(f"Uygulama hatası: {e}")
