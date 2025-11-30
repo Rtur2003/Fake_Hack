@@ -628,6 +628,11 @@ class HackSimulator:
             # Güncel sistem verilerini al
             current_cpu = psutil.cpu_percent(interval=0.0)
             current_memory = psutil.virtual_memory().percent
+            elapsed = int(time.time() - self.sequence_started_at) if self.sequence_started_at else 0
+            active_phase = "INIT"
+            if getattr(self, "operation_phases", None):
+                active_phase = self.operation_phases[self.current_phase_index].get("name", "PHASE")
+            staged_mb = 180 + int(self.sim_progress * 720)
             
             # Network bağlantıları
             connections = RealSystemInfo.get_network_connections()
@@ -636,7 +641,10 @@ class HackSimulator:
             top_processes = RealSystemInfo.get_running_processes()[:10]
             
             # Canlı veri metnini oluştur
-            live_data = f"=== REAL-TIME MONITORING ===\n\n"
+            live_data = "=== REAL-TIME MONITORING ===\n"
+            live_data += f"OP: {self.operation_code} | Phase: {active_phase} | Runtime: {elapsed}s\n"
+            live_data += f"Operation Progress: {int(self.sim_progress * 100)}%\n"
+            live_data += f"Data siphon staged: {staged_mb} MB\n\n"
             live_data += f"CPU Usage: {current_cpu}%\n"
             live_data += f"Memory Usage: {current_memory}%\n\n"
             
@@ -649,6 +657,10 @@ class HackSimulator:
                 cpu_pct = proc['cpu_percent'] or 0
                 mem_pct = proc['memory_percent'] or 0
                 live_data += f"{proc['name'][:15]:<15} CPU:{cpu_pct:4.1f}% MEM:{mem_pct:4.1f}%\n"
+            
+            live_data += "\n=== ACTIVE ALERTS ===\n"
+            live_data += f"Intrusion channel: {'encrypted' if random.random() > 0.3 else 'muted for stealth'}\n"
+            live_data += f"User presence: {'detected' if random.random() > 0.5 else 'idle'}\n"
             
             # Güncelle
             self.live_text.config(state='normal')
@@ -706,6 +718,9 @@ class HackSimulator:
     def start_simulation(self):
         """Simülasyonu başlat"""
         # Ana süreci başlat
+        self.sim_progress = 0.0
+        self.current_phase_index = 0
+        self.sequence_started_at = time.time()
         self.hack_thread = threading.Thread(target=self.hack_sequence, daemon=True)
         self.hack_thread.start()
         
@@ -721,20 +736,36 @@ class HackSimulator:
         while log_index < len(self.logs):
             elapsed = time.time() - start_time
             progress = min(elapsed / self.sim_duration, 1)
+            self.sim_progress = progress
             
             # İlerleme güncelle
             self.progress_bar['value'] = progress * 100
             self.progress_percent.config(text=f"{int(progress * 100)}%")
             
-            # İlerleme etiketini güncelle
-            if progress < 0.3:
-                self.progress_label.config(text="Scanning target system...")
-            elif progress < 0.6:
-                self.progress_label.config(text="Exploiting vulnerabilities...")
-            elif progress < 0.9:
-                self.progress_label.config(text="Installing backdoors...")
+            # Faz bazlı ilerleme etiketi
+            if self.phase_count:
+                phase_idx = min(int(progress * self.phase_count), self.phase_count - 1)
+                if phase_idx != self.current_phase_index:
+                    self.current_phase_index = phase_idx
+                phase = self.operation_phases[self.current_phase_index]
+                self.current_phase_name = phase.get("name", "PHASE")
+                phase_label = f"{phase.get('name', 'PHASE')} - {phase.get('status', '')}"
+                self.progress_label.config(text=phase_label)
+                if hasattr(self, "phase_badge"):
+                    self.phase_badge.config(text=f"PHASE {self.current_phase_index + 1}/{self.phase_count} | {self.current_phase_name.upper()}")
+                if hasattr(self, "threat_label"):
+                    threat_levels = ["STEALTH", "BREACH", "PIVOT", "EXFIL", "LOCKDOWN"]
+                    threat_text = threat_levels[min(self.current_phase_index, len(threat_levels) - 1)]
+                    self.threat_label.config(text=f"Threat: {threat_text}")
             else:
-                self.progress_label.config(text="Finalizing system compromise...")
+                if progress < 0.3:
+                    self.progress_label.config(text="Scanning target system...")
+                elif progress < 0.6:
+                    self.progress_label.config(text="Exploiting vulnerabilities...")
+                elif progress < 0.9:
+                    self.progress_label.config(text="Installing backdoors...")
+                else:
+                    self.progress_label.config(text="Finalizing system compromise...")
             
             # Yeni log ekleme zamanı
             if log_index < len(self.logs) and elapsed > log_index * (self.sim_duration / len(self.logs)):
@@ -756,8 +787,10 @@ class HackSimulator:
         
         # Tamamlandı
         self.add_terminal_line(f"\n=== SYSTEM {self.system_data.get('hostname', 'TARGET').upper()} FULLY COMPROMISED ===", color=HIGHLIGHT_COLOR)
+        self.add_terminal_line(f"Channel {self.operation_code} now persistent. Visual distortion on standby.", color=HIGHLIGHT_COLOR)
         self.status_label.config(text=f"Full control of {self.system_data.get('hostname', 'target')} achieved")
         self.progress_label.config(text="System compromise completed successfully!")
+        self.sim_progress = 1.0
         
         # 3 saniye bekle sonra pixel savaşını başlat
         time.sleep(3)
