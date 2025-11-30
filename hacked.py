@@ -599,10 +599,8 @@ class HackSimulator:
         self.hack_thread.start()
         
         # Otomatik kapanma
-        self.auto_close_timer = self.root.after(
-            (self.auto_close_time + TOTAL_TIME) * 1000, 
-            self.emergency_exit
-        )
+        total_wait_ms = int((self.config.auto_close + self.sim_duration) * 1000)
+        self.auto_close_timer = self.schedule(total_wait_ms, self.emergency_exit)
     
     def hack_sequence(self):
         """Ana hack sıralaması - gerçek sistem verileriyle"""
