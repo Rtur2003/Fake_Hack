@@ -722,14 +722,15 @@ class HackSimulator:
         self.pixels = []
         self.war_active = True
         self.war_tick_ms = max(30, self.config.war_tick_ms)
-        self.battle_round_limit = 240
+        self.battle_round_limit = 360 if self.config.glitch_mode else 240
         
         # İki farklı renk ordusu
         self.colors = {
             'red_army': ['#ff0000', '#ff3333', '#ff6666', '#cc0000', '#990000'],
             'blue_army': ['#0000ff', '#3333ff', '#6666ff', '#0000cc', '#000099'],
             'green_army': ['#00ff00', '#33ff33', '#66ff66', '#00cc00', '#009900'],
-            'chaos': ['#ffffff', '#ffff00', '#ff00ff', '#00ffff']
+            'chaos': ['#ffffff', '#ffff00', '#ff00ff', '#00ffff'],
+            'glitch': ['#00ff41', '#33ffaa', '#ff0080', '#ffffff', '#00ccff', '#ffcc00']
         }
         
         # Başlangıç mesajı
