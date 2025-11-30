@@ -157,6 +157,13 @@ class HackSimulator:
         else:
             self.root.geometry("1280x720")
             self.root.config(cursor="arrow")
+        self.root.bind("<F11>", self.toggle_fullscreen)
+        self.root.protocol("WM_DELETE_WINDOW", self.emergency_exit)
+        self.root.bind("<Escape>", self.emergency_exit)
+        self.root.bind("<Control-q>", self.emergency_exit)
+        if self.config.block_input:
+            self.root.bind_all("<Key>", self.block_input)
+            self.root.bind_all("<Button>", self.block_input)
         
         # Gerçek sistem verilerini al
         self.system_data = RealSystemInfo.get_system_info()
