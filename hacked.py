@@ -950,6 +950,9 @@ class HackSimulator:
     
     def end_war(self):
         """Savaşı bitir"""
+        if self.shutdown_flag:
+            return
+        self.war_active = False
         # Final efekti - tüm ekranı beyaz yap
         self.canvas.create_rectangle(
             0, 0, self.screen_width, self.screen_height,
