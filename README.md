@@ -27,13 +27,14 @@ python hacked.py [options]
 ```
 
 Key options:
-- `--duration SECONDS`     main simulation length (default 35s)
-- `--auto-close SECONDS`   extra wait after pixel war (default 15s)
+- `--duration SECONDS`     main simulation length (default 55s)
+- `--auto-close SECONDS`   extra wait after pixel war (default 25s)
 - `--no-fullscreen`        windowed mode
 - `--no-pixel-war`         skip the pixel battle
 - `--block-input`          block keyboard/mouse except ESC
 - `--pixel-size N`         pixel size for the war (default 5)
-- `--war-tick MS`          tick interval for war updates (default 60ms)
+- `--war-tick MS`          tick interval for war updates (default 45ms)
+- `--glitch-mode/--no-glitch` enable or disable static-like glitch effect (default on)
 
 Controls:
 - `ESC` / `Ctrl+Q` / EXIT button: close immediately
