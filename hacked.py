@@ -200,8 +200,22 @@ class HackSimulator:
     
     def load_data(self):
         """Veri dosyalarını yükle - gerçek sistem verileriyle"""
+        self.operation_code = f"SIG-{random.randint(10000, 99999)}"
+        process_snapshot = RealSystemInfo.get_running_processes()
+        connections_snapshot = RealSystemInfo.get_network_connections()
+        key_processes = [p['name'] for p in process_snapshot if p.get('name')]
+        primary_remote = "external relay"
+        if connections_snapshot:
+            remote_candidate = connections_snapshot[0].get('remote', '')
+            if remote_candidate and remote_candidate != "N/A":
+                primary_remote = remote_candidate
+        network_list = self.system_data.get('network_interfaces', [])
+        interface_display = ", ".join(network_list[:4]) if network_list else "loopback only"
+        cpu_load = self.system_data.get('cpu_usage', '0%')
+        
         # Gerçek sistem bilgilerini kullan
         self.system_info = [
+            f"Operation Code: {self.operation_code}",
             f"Target: {self.system_data.get('os', 'Unknown OS')}",
             f"Version: {self.system_data.get('version', 'Unknown')}",
             f"Architecture: {self.system_data.get('architecture', 'Unknown')}",
@@ -213,51 +227,105 @@ class HackSimulator:
             f"Memory: {self.system_data.get('total_memory', 'Unknown')} ({self.system_data.get('memory_usage', '0%')} used)",
             f"CPU Cores: {self.system_data.get('cpu_count', 'Unknown')}",
             f"CPU Frequency: {self.system_data.get('cpu_freq', 'Unknown')}",
-            f"CPU Usage: {self.system_data.get('cpu_usage', '0%')}",
+            f"CPU Usage: {cpu_load}",
             f"Disk Total: {self.system_data.get('disk_total', 'Unknown')}",
             f"Disk Used: {self.system_data.get('disk_used', 'Unknown')} ({self.system_data.get('disk_usage', '0%')})",
             f"Boot Time: {self.system_data.get('boot_time', 'Unknown')}",
-            f"Processes: {self.system_data.get('process_count', 0)} running"
+            f"Processes: {self.system_data.get('process_count', 0)} running",
+            f"Leading Tasks: {', '.join(key_processes[:5]) if key_processes else 'n/a'}",
+            f"Sample Remote: {primary_remote}"
         ]
         
-        # Gerçekçi hack logları
-        self.logs = [
-            f"Establishing connection to {self.system_data.get('hostname', 'target')}...",
-            f"Scanning {self.system_data.get('ip_address', '127.0.0.1')} for vulnerabilities...",
-            f"Found {self.system_data.get('os', 'target OS')} running on target system",
-            f"Exploiting {self.system_data.get('architecture', 'unknown')} architecture vulnerabilities...",
-            f"Bypassing {self.system_data.get('username', 'user')} account restrictions...",
-            f"Accessing system with {self.system_data.get('cpu_count', '1')} CPU cores detected...",
-            f"Memory footprint: {self.system_data.get('memory_usage', 'unknown')} utilization",
-            f"Infiltrating {len(self.system_data.get('network_interfaces', []))} network interfaces...",
-            "Escalating privileges to administrator level...",
-            "Installing keylogger and screen capture modules...",
-            f"Backdoor installed on port {random.randint(8000, 9999)}",
-            "Encrypting harvested credentials...",
-            f"Exfiltrating data via MAC {self.system_data.get('mac_address', 'unknown')}...",
-            "Covering tracks and clearing event logs...",
-            "Establishing persistent remote access...",
-            "Operation completed - Full system compromise achieved."
+        # Operasyon fazları - daha uzun ve katmanlı senaryo
+        self.operation_phases = [
+            {
+                "name": "Reconnaissance",
+                "status": "Mapping live telemetry",
+                "logs": [
+                    f"[RECON] fingerprint: {self.system_data.get('os', 'Unknown OS')} / {self.system_data.get('architecture', '?')}",
+                    f"[RECON] host {self.system_data.get('hostname', 'target')} responds at {self.system_data.get('ip_address', '127.0.0.1')}",
+                    f"[RECON] interfaces mapped: {interface_display}",
+                    f"[RECON] cpu baseline {cpu_load} | mem {self.system_data.get('memory_usage', '0%')}",
+                    f"[RECON] booted at {self.system_data.get('boot_time', 'Unknown')}",
+                    f"[RECON] {self.system_data.get('process_count', 0)} running processes catalogued",
+                    f"[RECON] top tasks: {', '.join(key_processes[:4]) if key_processes else 'idle'}",
+                    f"[RECON] open link observed: {primary_remote}"
+                ]
+            },
+            {
+                "name": "Breach & Payload",
+                "status": "Dropping signed implants",
+                "logs": [
+                    f"[BREACH] staged loader signed as system service ({self.operation_code})",
+                    f"[BREACH] user token hijacked: {self.system_data.get('username', 'user')}",
+                    f"[BREACH] memory tuned for {self.system_data.get('cpu_count', '1')} cores @ {self.system_data.get('cpu_freq', 'N/A')}",
+                    "[BREACH] stealth hypervisor shim inserted",
+                    f"[BREACH] fallback tunnel reserved on port {random.randint(6000, 9000)}",
+                    "[BREACH] anti-forensics: event channel muted",
+                    "[BREACH] credential cache mirrored and sealed",
+                    "[BREACH] lateral kit warmed in memory"
+                ]
+            },
+            {
+                "name": "Pivot & Lateral",
+                "status": "Moving across surfaces",
+                "logs": [
+                    f"[PIVOT] enumerating shared memory on {self.system_data.get('hostname', 'target')}",
+                    f"[PIVOT] scanning {len(network_list)} interfaces for lateral paths",
+                    f"[PIVOT] {random.randint(3, 8)} credential replays throttled for stealth",
+                    "[PIVOT] RDP shadow session ghosted",
+                    "[PIVOT] kernel callbacks patched for covert syscalls",
+                    f"[PIVOT] privilege map compiled for user {self.system_data.get('username', 'user')}",
+                    "[PIVOT] ARP cache poisoning staged for neighbors",
+                    "[PIVOT] update service swapped for covert beacon"
+                ]
+            },
+            {
+                "name": "Data Ops & Exfil",
+                "status": "Harvesting local assets",
+                "logs": [
+                    f"[EXFIL] compressing user profile for {self.system_data.get('username', 'user')}",
+                    f"[EXFIL] streaming {random.randint(480, 980)} MB to {primary_remote}",
+                    f"[EXFIL] disk utilization snapshot: {self.system_data.get('disk_usage', '0%')}",
+                    "[EXFIL] clipboard and keystroke stream copied",
+                    "[EXFIL] document manifest sealed with one-time pad",
+                    "[EXFIL] camera probe denied; routing through virtual device",
+                    "[EXFIL] password vault mimic responding",
+                    "[EXFIL] dark dropbox handshake acknowledged"
+                ]
+            },
+            {
+                "name": "Cleanup & Control",
+                "status": "Locking system down",
+                "logs": [
+                    "[COVER] wiping recent event traces",
+                    f"[COVER] timestamps forged back to {self.system_data.get('boot_time', 'boot')}",
+                    "[COVER] DNS cache poisoned with decoy nodes",
+                    f"[COVER] persistence heartbeat pinned to {self.system_data.get('ip_address', '127.0.0.1')}",
+                    f"[COVER] static backdoor armed ({self.operation_code})",
+                    "[COVER] user prompts suppressed with phantom clicks",
+                    "[COVER] security center telemetry muted",
+                    "[COVER] watchdog triggers rerouted to dummy driver",
+                    "[COVER] visual distortion module primed",
+                    "[COVER] operator awaiting final lock sequence"
+                ]
+            }
         ]
-        
-        self.status_messages = [
-            f"STATUS: Connected to {self.system_data.get('hostname', 'target')}",
-            "STATUS: Vulnerability scan complete",
-            "STATUS: Payload injection successful", 
-            "STATUS: Privilege escalation in progress",
-            "STATUS: System enumeration complete",
-            "WARNING: Antivirus software detected - evading...",
-            "INFO: Stealth mode activated",
-            "SUCCESS: Root access obtained",
-            "STATUS: Installing persistence mechanisms",
-            "STATUS: Data harvesting in progress",
-            "INFO: Network traffic masking enabled",
-            "STATUS: Credential dump successful",
-            "WARNING: User activity detected - hiding presence",
-            "STATUS: Log cleanup completed",
-            "SUCCESS: Remote backdoor established",
-            "COMPLETE: Mission accomplished - Full control achieved"
-        ]
+
+        self.phase_count = len(self.operation_phases)
+        self.logs, self.status_messages = self.compose_script(self.operation_phases)
+        self.current_phase_name = self.operation_phases[0]["name"] if self.operation_phases else "Sequence"
+
+    def compose_script(self, phases):
+        """Faz senaryolarını zaman çizgisine dök"""
+        timeline = []
+        statuses = []
+        for phase in phases:
+            label = f"{phase.get('name', 'PHASE')} | {phase.get('status', '')}"
+            for entry in phase.get('logs', []):
+                timeline.append(entry)
+                statuses.append(label)
+        return timeline, statuses
     
     def create_gui(self):
         """Sade ve profesyonel arayüz oluştur"""
