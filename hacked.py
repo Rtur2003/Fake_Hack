@@ -1,20 +1,22 @@
-import tkinter as tk
-from tkinter import ttk
-import threading
-import time
-import random
-import os
-import sys
-import pygame
-from PIL import Image, ImageTk
+import argparse
+import getpass
 import json
+import os
 import platform
-import psutil
+import random
 import socket
 import subprocess
-import getpass
-from datetime import datetime
+import sys
+import threading
+import time
 import uuid
+from datetime import datetime
+
+import pygame
+import psutil
+import tkinter as tk
+from tkinter import ttk
+from PIL import Image, ImageTk
 
 # Sabit değişkenler
 TOTAL_TIME = 30  # Toplam simülasyon süresi (saniye)
