@@ -869,6 +869,8 @@ class HackSimulator:
         
         # Pixel savaşını başlat
         self.root.after(1200, self.initialize_armies)
+        # Gözetmen yazı şeridi
+        self.start_overlay_script()
     
     def show_war_message(self):
         """Savaş başlangıç mesajını göster"""
@@ -901,6 +903,54 @@ class HackSimulator:
         
         # Yanıp sönme efekti
         self.blink_warning()
+
+    def start_overlay_script(self):
+        """Glitch sonrası yavaş akan, 4. duvarı delen metinler"""
+        if self.shutdown_flag:
+            return
+        host = self.system_data.get('hostname', 'TARGET').upper()
+        user = self.system_data.get('username', 'user')
+        overlay_script = [
+            {"delay": 4200, "text": f"we are inside {host}", "color": "#ff5555", "y": self.screen_height//2 + 120},
+            {"delay": 7200, "text": "stop moving the mouse. it does not help.", "color": "#ffaaaa", "y": self.screen_height//2 + 170},
+            {"delay": 9800, "text": f"{user}, why are you still watching?", "color": "#ffeeaa", "y": self.screen_height//2 + 220},
+            {"delay": 12800, "text": "we keep what we want. you keep the noise.", "color": "#ff5555", "y": self.screen_height//2 + 270},
+            {"delay": 15600, "text": "the glitch is not the attack. it is the cover.", "color": "#ffcccc", "y": self.screen_height//2 + 320},
+            {"delay": 18600, "text": "screen may go white. that is when we finish.", "color": "#ffffff", "y": self.screen_height//2 + 380},
+        ]
+        for item in overlay_script:
+            self.schedule(item["delay"], lambda msg=item: self.typewriter_overlay(msg))
+
+    def typewriter_overlay(self, msg):
+        """Canvas üstünde yavaş yazı efekti"""
+        if self.shutdown_flag or not getattr(self, "canvas", None):
+            return
+        text = msg.get("text", "")
+        color = msg.get("color", "#ff5555")
+        y_pos = msg.get("y", self.screen_height // 2)
+        font = msg.get("font", ("Consolas", 18, "bold"))
+        speed = msg.get("speed", 35)
+        fade = msg.get("fade", 2000)
+
+        text_id = self.canvas.create_text(
+            self.screen_width // 2,
+            y_pos,
+            text="",
+            fill=color,
+            font=font,
+            tags="overlay"
+        )
+
+        def step(i=0):
+            if self.shutdown_flag or not self.canvas.winfo_exists():
+                return
+            self.canvas.itemconfig(text_id, text=text[:i])
+            if i < len(text):
+                self.schedule(speed, lambda: step(i + 1))
+            else:
+                self.schedule(fade, lambda: self.canvas.delete(text_id))
+
+        step()
     
     def blink_warning(self, count=0):
         """Uyarı mesajını yanıp söndür"""
@@ -1151,6 +1201,14 @@ class HackSimulator:
             text=end_text,
             fill='black',
             font=('Consolas', 48, 'bold'),
+            tags='final'
+        )
+        # 4. duvar notu
+        self.canvas.create_text(
+            self.screen_width//2, self.screen_height//2 + 80,
+            text="we kept the signal. you keep the screen.",
+            fill='#ff0000',
+            font=('Consolas', 18, 'bold'),
             tags='final'
         )
         
