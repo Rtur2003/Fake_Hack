@@ -151,8 +151,12 @@ class HackSimulator:
         self.sim_duration = self.config.duration
         self.root.title("System Access Terminal")
         self.root.configure(bg=BACKGROUND_COLOR)
-        self.root.attributes('-fullscreen', True)
-        self.root.config(cursor="none")
+        if self.config.fullscreen:
+            self.root.attributes('-fullscreen', True)
+            self.root.config(cursor="none")
+        else:
+            self.root.geometry("1280x720")
+            self.root.config(cursor="arrow")
         
         # Gerçek sistem verilerini al
         self.system_data = RealSystemInfo.get_system_info()
