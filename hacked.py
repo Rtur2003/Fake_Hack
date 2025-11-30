@@ -564,12 +564,21 @@ class HackSimulator:
         # Sistem durumu
         system_status = tk.Label(
             status_frame,
-            text=f"Target: {self.system_data.get('ip_address', '127.0.0.1')} | CPU: {self.system_data.get('cpu_usage', '0%')} | RAM: {self.system_data.get('memory_usage', '0%')}",
+            text=f"Target: {self.system_data.get('ip_address', '127.0.0.1')} | OP: {self.operation_code} | CPU: {self.system_data.get('cpu_usage', '0%')} | RAM: {self.system_data.get('memory_usage', '0%')}",
             fg=SECONDARY_TEXT,
             bg="#2d2d2d",
             font=("Consolas", 9)
         )
         system_status.pack(side='left', padx=20, fill='y')
+        
+        self.threat_label = tk.Label(
+            status_frame,
+            text="Threat: STEALTH",
+            fg=HIGHLIGHT_COLOR,
+            bg="#2d2d2d",
+            font=("Consolas", 9, "bold")
+        )
+        self.threat_label.pack(side='right', padx=10, fill='y')
         
         # Saat
         self.time_label = tk.Label(
