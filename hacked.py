@@ -315,6 +315,15 @@ class HackSimulator:
         self.phase_count = len(self.operation_phases)
         self.logs, self.status_messages = self.compose_script(self.operation_phases)
         self.current_phase_name = self.operation_phases[0]["name"] if self.operation_phases else "Sequence"
+        # 4. duvarı delen, gözlemci mesajları
+        self.observer_messages = [
+            "[OBSERVER] keep your hands off the keyboard. signal already bound.",
+            "[OBSERVER] clicks are just metronome noise. we listen in silence.",
+            f"[OBSERVER] {self.system_data.get('username', 'user')}, do you feel someone reading over your shoulder?",
+            f"[OBSERVER] mirrors opened on {self.system_data.get('hostname', 'TARGET').upper()}. you are the reflection.",
+            "[OBSERVER] payload lives after the screen goes dark.",
+            "[OBSERVER] this is not real hacking. but it is real watching."
+        ]
 
     def compose_script(self, phases):
         """Faz senaryolarını zaman çizgisine dök"""
@@ -723,6 +732,7 @@ class HackSimulator:
         self.sequence_started_at = time.time()
         self.hack_thread = threading.Thread(target=self.hack_sequence, daemon=True)
         self.hack_thread.start()
+        self.schedule_whispers()
         
         # Otomatik kapanma
         total_wait_ms = int((self.config.auto_close + self.sim_duration) * 1000)
