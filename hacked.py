@@ -29,6 +29,18 @@ HIGHLIGHT_COLOR = "#ff4444"
 TERMINAL_BG = "#1a1a1a"
 SECONDARY_TEXT = "#888888"
 
+
+@dataclass
+class SimulatorConfig:
+    duration: int = DEFAULT_DURATION
+    auto_close: int = DEFAULT_AUTO_CLOSE
+    fullscreen: bool = True
+    enable_pixel_war: bool = True
+    block_input: bool = False
+    pixel_size: int = 5
+    war_tick_ms: int = 60
+
+
 class RealSystemInfo:
     """Gerçek sistem bilgilerini toplayan sınıf"""
     
